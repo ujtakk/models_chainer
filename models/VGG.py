@@ -59,7 +59,7 @@ class VGG(chainer.Chain):
 
     """
 
-    def __init__(self, class_labels=10):
+    def __init__(self, image_colors=3, class_labels=10):
         super(VGG, self).__init__(
             block1_1=Block(64, 3),
             block1_2=Block(64, 3),
