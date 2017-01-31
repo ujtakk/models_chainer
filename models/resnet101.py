@@ -6,20 +6,20 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 
-from ._ResNet import BottleNeckA, BottleNeckB, Block
+from ._resnet import BottleNeckA, BottleNeckB, Block
 
-class ResNet50(chainer.Chain):
+class ResNet101(chainer.Chain):
 
     insize = 224
 
     def __init__(self, image_colors=3, class_labels=10):
         w = math.sqrt(2)
-        super(ResNet50, self).__init__(
+        super(ResNet101, self).__init__(
             conv1=L.Convolution2D(image_colors, 64, 7, 2, 3, w, nobias=True),
             bn1=L.BatchNormalization(64),
             res2=Block(3, 64, 64, 256, 1),
             res3=Block(4, 256, 128, 512),
-            res4=Block(6, 512, 256, 1024),
+            res4=Block(23, 512, 256, 1024),
             res5=Block(3, 1024, 512, 2048),
             fc=L.Linear(2048, class_labels),
         )

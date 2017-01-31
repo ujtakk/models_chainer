@@ -6,7 +6,7 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 
-from ._ResNet import BottleNeckA, BottleNeckB, Block
+from ._resnet import BottleNeckA, BottleNeckB, Block
 
 class ResNet152(chainer.Chain):
 

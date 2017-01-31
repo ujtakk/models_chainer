@@ -4,38 +4,46 @@
 import chainer
 
 def dataset(name):
-    from chainer.datasets import get_mnist
-    from chainer.datasets import get_cifar10
-    from chainer.datasets import get_cifar100
+    from datasets import (
+        get_mnist, get_cifar10, get_cifar100,
+        get_imagenet
+    )
 
-    if name == 'mnist':
-        print('using MNIST dataset.')
-        image_colors = 1
-        class_labels = 10
-        train, test = get_mnist(ndim=3)
-    elif name == 'cifar10':
-        print('using cifar10 dataset.')
-        image_colors = 3
-        class_labels = 10
-        train, test = get_cifar10()
-    elif name == 'cifar100':
-        print('Using CIFAR100 dataset.')
-        image_colors = 3
-        class_labels = 100
-        train, test = get_cifar100()
+    def_attr = lambda image_colors, class_labels: \
+        (image_colors, class_labels)
+
+    sets = {
+        "mnist": {
+            "attr": def_attr(1, 10),
+            "data": get_mnist(ndim=3)
+        },
+        "cifar10": {
+            "attr": def_attr(3, 10),
+            "data": get_cifar10()
+        },
+        "cifar100": {
+            "attr": def_attr(3, 100),
+            "data": get_cifar100()
+        },
+        "imagenet": {
+            "attr": def_attr(3, 1000),
+            "data": get_imagenet()
+        }
+    }
+
+    print('using {} dataset.'.format(name))
+
+    if sets.has_key(name):
+        return sets[name]
     else:
         raise RuntimeError('Invalid dataset choice.')
 
-    return {
-        "attr": (image_colors, class_labels),
-        "data": (train, test)
-    }
-
-def model(arch_name, image_colors, class_labels):
+def model(name, image_colors, class_labels):
     import chainer.links as L
     import models as M
 
     archs = {
+        'nin': M.NIN,
         'vgg': M.VGG,
         'leblock': M.LeBlock,
         'resblock': M.ResBlock,
@@ -44,7 +52,7 @@ def model(arch_name, image_colors, class_labels):
         'resnet152': M.ResNet152,
     }
 
-    return L.Classifier(archs[arch_name](image_colors, class_labels))
+    return L.Classifier(archs[name](image_colors, class_labels))
 
 def trainer(args, model, optimizer, train, test):
     from chainer import training
@@ -58,9 +66,12 @@ def trainer(args, model, optimizer, train, test):
             model.train = True
             return ret
 
-    train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
-    test_iter  = chainer.iterators.SerialIterator(test, args.batchsize,
-                                                  repeat=False, shuffle=False) 
+    train_iter = chainer.iterators.MultiprocessIterator(
+        train, args.batchsize, n_processes=args.loaderjob)
+    test_iter= chainer.iterators.MultiprocessIterator(
+        test, args.val_batchsize, repeat=False, n_processes=args.loaderjob)
+    # test_iter  = chainer.iterators.SerialIterator(test, args.batchsize,
+    #                                               repeat=False, shuffle=False)
     # Set up a trainer
     updater = training.StandardUpdater(train_iter, optimizer, device=args.gpu)
     trainer = training.Trainer(updater, (args.epoch, 'epoch'), out=args.out)
