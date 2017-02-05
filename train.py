@@ -63,9 +63,6 @@ def main():
     trainer = make.trainer(args, model, optim, train, test)
     trainer.run()
 
-    # for l in model.predictor.namedparams():
-    #   print(l)
-    # print(model.predictor.__class__.__name__)
     make.weight(model)
 
 if __name__ == '__main__':
