@@ -4,10 +4,8 @@
 import chainer
 
 def dataset(name):
-    from datasets import (
-        get_mnist, get_cifar10, get_cifar100,
-        get_imagenet
-    )
+    from chainer.datasets import get_mnist, get_cifar10, get_cifar100
+    from datasets import get_imagenet
 
     def_attr = lambda image_colors, class_labels: \
         (image_colors, class_labels)
@@ -33,7 +31,7 @@ def dataset(name):
 
     print('using {} dataset.'.format(name))
 
-    if sets.has_key(name):
+    if name in sets:
         return sets[name]
     else:
         raise RuntimeError('Invalid dataset choice.')
@@ -45,6 +43,7 @@ def model(name, image_colors, class_labels):
     archs = {
         'nin': M.NIN,
         'vgg': M.VGG,
+        'lenet': M.LeNet,
         'leblock': M.LeBlock,
         'resblock': M.ResBlock,
         'resnet50': M.ResNet50,
@@ -110,4 +109,29 @@ def trainer(args, model, optimizer, train, test):
         chainer.serializers.load_npz(args.resume, trainer)
 
     return trainer
+
+def weight(model):
+    import os
+    from os.path import exists, join
+    import save
+
+    save_func = {
+        "Convolution2D":
+            lambda name, layer: save.conv(name, layer),
+        "Linear":
+            lambda name, layer: save.full(name, layer),
+        "BatchNormalization":
+            lambda name, layer: save.bn(name, layer),
+    }
+
+    model_name = model.predictor.__class__.__name__.lower()
+    if not exists(model_name):
+        os.makedirs(model_name)
+
+    for layer in model.predictor.links(skipself=True):
+        layer_class = layer.__class__.__name__
+        if layer_class in save_func:
+            save_func[layer_class](model_name, layer)
+        else:
+            print("{}({}) pass".format(layer.__class__.__name__, layer.name))
 

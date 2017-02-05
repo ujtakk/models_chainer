@@ -50,13 +50,13 @@ class LeBlock(chainer.Chain):
     def __init__(self, image_colors=3, class_labels=10):
         super(LeBlock, self).__init__(
             block=Block(32, image_colors),
-            fc0=L.Linear(None, 256),
-            fc1=L.Linear(None, class_labels),
+            full0=L.Linear(None, 256),
+            full1=L.Linear(None, class_labels),
         )
         self.train = True
 
     def __call__(self, x):
         h = self.block(x, self.train)
-        h = self.fc0(h)
+        h = self.full0(h)
         h = F.relu(h)
-        return self.fc1(h)
+        return self.full1(h)

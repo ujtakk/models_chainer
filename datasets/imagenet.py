@@ -57,7 +57,7 @@ def get_imagenet():
     file_mean  = "/home/work/takau/models_chainer/datasets/imagenet_mean.npy"
     file_train = "/home/work/takau/models_chainer/datasets/imagenet_train.txt"
     file_val   = "/home/work/takau/models_chainer/datasets/imagenet_val.txt"
-    insize     = 227
+    insize     = 224
 
     mean = np.load(file_mean)
 

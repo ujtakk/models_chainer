@@ -9,13 +9,13 @@ def optparse():
 
     parser = argparse.ArgumentParser(description='Training script with chainer')
 
-    parser.add_argument('--dataset', '-d', default='cifar10',
+    parser.add_argument('--dataset', '-d', default='mnist',
                         help='The dataset to use: mnist, cifar10 or cifar100')
-    parser.add_argument('--batchsize', '-b', type=int, default=128,
+    parser.add_argument('--batchsize', '-b', type=int, default=32,
                         help='Number of images in each mini-batch')
     parser.add_argument('--initmodel',
                         help='Initialize the model from given file')
-    parser.add_argument('--epoch', '-e', type=int, default=100,
+    parser.add_argument('--epoch', '-e', type=int, default=5,
                         help='Number of sweeps over the dataset to train')
     parser.add_argument('--gpu', '-g', type=int, default=0,
                         help='GPU ID (negative value indicates CPU)')
@@ -23,9 +23,9 @@ def optparse():
                         help='Directory to output the result')
     parser.add_argument('--resume', '-r', default='',
                         help='Resume the training from snapshot')
-    parser.add_argument('--arch', '-a', default='vgg',
+    parser.add_argument('--arch', '-a', default='lenet',
                         help='ConvNet architecture')
-    parser.add_argument('--loaderjob', '-j', type=int, default=4,
+    parser.add_argument('--loaderjob', '-j', type=int, default=8,
                         help='Number of parallel data loading processes')
     parser.add_argument('--val_batchsize', '-v', type=int, default=250,
                         help='Validation minibatch size')
@@ -63,6 +63,11 @@ def main():
     optim.setup(model)
     trainer = make.trainer(args, model, optim, train, test)
     trainer.run()
+
+    # for l in model.predictor.namedparams():
+    #   print(l)
+    # print(model.predictor.__class__.__name__)
+    make.weight(model)
 
 if __name__ == '__main__':
     main()
