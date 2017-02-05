@@ -6,7 +6,6 @@ import make
 
 def optparse():
     import argparse
-
     parser = argparse.ArgumentParser(description='Training script with chainer')
 
     parser.add_argument('--dataset', '-d', default='mnist',
