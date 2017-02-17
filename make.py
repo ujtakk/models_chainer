@@ -51,7 +51,10 @@ def model(name, image_colors, class_labels):
         'resnet152': M.ResNet152,
     }
 
-    return L.Classifier(archs[name](image_colors, class_labels))
+    if name in archs:
+        return L.Classifier(archs[name](image_colors, class_labels))
+    else:
+        raise RuntimeError('Invalid architecture choice.')
 
 def trainer(args, model, optimizer, train, test):
     from chainer import training
