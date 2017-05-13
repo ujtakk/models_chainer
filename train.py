@@ -40,9 +40,10 @@ def main():
     print('')
 
     # Load the dataset
-    dataset = make.dataset(args.dataset)
-    image_colors, class_labels = dataset['attr']
-    train, test = dataset['data']
+    # dataset = make.dataset(args.dataset)
+    # image_colors, class_labels = dataset['attr']
+    # train, test = dataset['data']
+    image_colors, class_labels = 3, 10
 
     # Set up a neural network to train.
     # Classifier reports softmax cross entropy loss and accuracy at every
@@ -57,13 +58,14 @@ def main():
         chainer.cuda.get_device(args.gpu).use()
         model.to_gpu()
 
+    print(type(model))
     # Run the training
-    optim   = chainer.optimizers.AdaGrad()
-    optim.setup(model)
-    trainer = make.trainer(args, model, optim, train, test)
-    trainer.run()
+    # optim   = chainer.optimizers.AdaGrad()
+    # optim.setup(model)
+    # trainer = make.trainer(args, model, optim, train, test)
+    # trainer.run()
 
-    make.weight(model)
+    # make.weight(model)
 
 if __name__ == '__main__':
     main()
