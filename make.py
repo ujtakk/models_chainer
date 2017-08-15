@@ -13,19 +13,19 @@ def dataset(name):
     sets = {
         "mnist": {
             "attr": def_attr(1, 10),
-            "data": get_mnist(ndim=3)
+            "data": lambda: get_mnist(ndim=3)
         },
         "cifar10": {
             "attr": def_attr(3, 10),
-            "data": get_cifar10()
+            "data": lambda: get_cifar10()
         },
         "cifar100": {
             "attr": def_attr(3, 100),
-            "data": get_cifar100()
+            "data": lambda: get_cifar100()
         },
         "imagenet": {
             "attr": def_attr(3, 1000),
-            "data": get_imagenet()
+            "data": lambda: get_imagenet()
         }
     }
 
