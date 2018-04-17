@@ -43,7 +43,9 @@ def model(name, image_colors, class_labels):
     archs = {
         'nin': M.NIN,
         'vgg': M.VGG,
-        'lenet': M.LeNet,
+        'mlp': M.MLP,
+        'lenet3x3': M.LeNet3x3,
+        'lenet5x5': M.LeNet5x5,
         'leblock': M.LeBlock,
         'resblock': M.ResBlock,
         'resnet50': M.ResNet50,
@@ -60,40 +62,40 @@ def trainer(args, model, optimizer, train, test):
     from chainer import training
     from chainer.training import extensions
 
-    class TestModeEvaluator(extensions.Evaluator):
-        def evaluate(self):
-            model = self.get_target('main')
-            model.train = False
-            ret = super(TestModeEvaluator, self).evaluate()
-            model.train = True
-            return ret
-
     train_iter = chainer.iterators.MultiprocessIterator(
         train, args.batchsize, n_processes=args.loaderjob)
     test_iter= chainer.iterators.MultiprocessIterator(
         test, args.val_batchsize, repeat=False, n_processes=args.loaderjob)
     # test_iter  = chainer.iterators.SerialIterator(test, args.batchsize,
     #                                               repeat=False, shuffle=False)
+
     # Set up a trainer
     updater = training.StandardUpdater(train_iter, optimizer, device=args.gpu)
     trainer = training.Trainer(updater, (args.epoch, 'epoch'), out=args.out)
 
     # Evaluate the model with the test dataset for each epoch
-    trainer.extend(TestModeEvaluator(test_iter, model, device=args.gpu))
-
-    # Reduce the learning rate by half every 25 epochs.
-    trainer.extend(extensions.ExponentialShift('lr', 0.5),
-                   trigger=(25, 'epoch'))
+    trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpu))
 
     # Dump a computational graph from 'loss' variable at the first iteration
     # The "main" refers to the target link of the "main" optimizer.
     trainer.extend(extensions.dump_graph('main/loss'))
 
-    # Take a snapshot at each epoch
-    trainer.extend(extensions.snapshot(), trigger=(args.epoch, 'epoch'))
+    # Take a snapshot for each specified epoch
+    frequency = args.epoch if args.frequency == -1 else max(1, args.frequency)
+    trainer.extend(extensions.snapshot(), trigger=(frequency, 'epoch'))
 
     # Write a log of evaluation statistics for each epoch
     trainer.extend(extensions.LogReport())
+
+    # Save two plot images to the result dir
+    if extensions.PlotReport.available():
+        trainer.extend(
+            extensions.PlotReport(['main/loss', 'validation/main/loss'],
+                                  'epoch', file_name='loss.png'))
+        trainer.extend(
+            extensions.PlotReport(
+                ['main/accuracy', 'validation/main/accuracy'],
+                'epoch', file_name='accuracy.png'))
 
     # Print selected entries of the log to stdout
     # Here "main" refers to the target link of the "main" optimizer again, and

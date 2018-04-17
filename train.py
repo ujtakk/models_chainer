@@ -16,6 +16,8 @@ def optparse():
                         help='Initialize the model from given file')
     parser.add_argument('--epoch', '-e', type=int, default=5,
                         help='Number of sweeps over the dataset to train')
+    parser.add_argument('--frequency', '-f', type=int, default=-1,
+                        help='Frequency of taking a snapshot')
     parser.add_argument('--gpu', '-g', type=int, default=0,
                         help='GPU ID (negative value indicates CPU)')
     parser.add_argument('--out', '-o', default='result',
@@ -58,9 +60,8 @@ def main():
         chainer.cuda.get_device(args.gpu).use()
         model.to_gpu()
 
-    print(type(model))
     # Run the training
-    optim = chainer.optimizers.AdaGrad()
+    optim = chainer.optimizers.Adam()
     optim.setup(model)
     trainer = make.trainer(args, model, optim, train, test)
     trainer.run()

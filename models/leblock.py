@@ -32,15 +32,15 @@ class Block(chainer.Chain):
             bn2=L.BatchNormalization(out_channels),
         )
 
-    def __call__(self, x, train=True):
+    def __call__(self, x):
         h = self.conv0(x)
-        h = self.bn0(h, test=not train)
+        h = self.bn0(h)
         h = F.relu(h)
         h = self.conv1(h)
-        h = self.bn1(h, test=not train)
+        h = self.bn1(h)
         h = F.relu(h)
         h = self.conv2(h)
-        h = self.bn2(h, test=not train)
+        h = self.bn2(h)
         h = F.relu(h)
         return h
 
@@ -53,10 +53,9 @@ class LeBlock(chainer.Chain):
             full0=L.Linear(None, 256),
             full1=L.Linear(None, class_labels),
         )
-        self.train = True
 
     def __call__(self, x):
-        h = self.block(x, self.train)
+        h = self.block(x)
         h = self.full0(h)
         h = F.relu(h)
         return self.full1(h)

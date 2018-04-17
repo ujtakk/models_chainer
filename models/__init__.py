@@ -1,4 +1,5 @@
-from .lenet import LeNet
+from .mlp import MLP
+from .lenet import LeNet3x3, LeNet5x5
 from .leblock import LeBlock
 from .vgg import VGG
 from .nin import NIN
